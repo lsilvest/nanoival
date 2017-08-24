@@ -163,17 +163,23 @@ nanoival(start, end, sopen = FALSE, eopen = TRUE)
   along.with = NULL, ...)
 }
 \arguments{
-\item{x}{The object which want to convert to class \code{nanotime}}
+\item{start}{\code{nanotime} start of interval}
+
+\item{end}{\code{nanotime} end of interval}
+
+\item{sopen}{logical indicating if the start of the interval is open}
+
+\item{eopen}{logical indicating if the end of the interval is open}
+
+\item{x}{a \code{nanoival} object}
 
 \item{...}{further arguments passed to or from methods.}
 
 \item{object}{argument for method \code{show}}
 
-\item{value}{argument for \code{nanotime-class}}
+\item{value}{argument for \code{nanoival-class}}
 
-\item{tz}{Required for \code{as.POSIXct} and \code{as.POSIXlt},
-can be set via \code{options("nanotimeFormat")} and uses \sQuote{UTC} as
-a default and fallback}
+\item{tz}{a timezone string}
 
 \item{e1}{Operand of class \code{nanoival}}
 
@@ -248,8 +254,34 @@ It can be overriden by using \code{options()} with the key of
 }
 
 \examples{
-x <- as.nanoival("-2012-03-01T21:21:00.000000001+00:00->2015-01-01T21:22:00.000000999+04:00+")
-print(x)
+## creating a \\code{nanoival}, with the start time included ('+') and the end
+## time excluded ('-')
+as.nanoival("+2012-03-01T21:21:00.000000001+00:00->2015-01-01T21:22:00.000000999+04:00-")
+
+## a \\code{nanoival} can also be created with a pair of \\code{nanotime} objects, a start
+## and an end, and optionally two logicals determining if the interval start(end) are open
+## or closed; by default the start is closed and end is open:
+start <- nanotime("2012-03-01T21:21:00.000000001+00:00")
+end <- nanotime("2013-03-01T21:21:00.000000001+00:00")
+nanoival(start, end)
+
+## a vector of \\code{nanotime} can be subsetted by an interval:
+fmt <- "\%Y-\%m-\%d \%H:\%M:\%S"
+one_second <- 1e9
+a <- seq(nanotime("2012-12-12 12:12:12", fmt), length.out=10, by=one_second)
+idx <- c(as.nanoival("-2012-12-12 12:12:10 -> 2012-12-12 12:12:14-", fmt),
+         as.nanoival("+2012-12-12 12:12:18 -> 2012-12-12 12:12:20+", fmt))
+a[idx]
+
+## \\code{nanoival} also has the set operations \\code{union}, \\code{intersect},
+## \\code{setdiff}
+a <- seq(nanotime("2012-12-12 12:12:12", fmt), length.out=10, by=one_second)
+i <- as.nanoival("-2012-12-12 12:12:14 -> 2012-12-12 12:12:18-", fmt)
+setdiff(a, i)
+
+i1 <- as.nanoival("+2012-12-12 12:12:14 -> 2012-12-12 12:12:17-", fmt)
+i2 <- as.nanoival("+2012-12-12 12:12:16 -> 2012-12-12 12:12:18-", fmt)
+union(i1, i2)
 }
 \author{
 Leonardo Silvestri

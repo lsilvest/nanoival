@@ -13,6 +13,51 @@ vector.
 
 ### Examples
 
+Creating a \code{nanoival}, with the start time included ('+') and the end
+time excluded ('-')
+
+~~~ R
+as.nanoival("+2012-03-01T21:21:00.000000001+00:00->2015-01-01T21:22:00.000000999+04:00-")
+~~~
+
+a `nanoival` can also be created with a pair of `nanotime` objects, a start
+and an end, and optionally two logicals determining if the interval start(end) are open
+or closed; by default the start is closed and end is open:
+
+~~~ R
+start <- nanotime("2012-03-01T21:21:00.000000001+00:00")
+end <- nanotime("2013-03-01T21:21:00.000000001+00:00")
+nanoival(start, end)
+~~~
+
+a vector of `nanotime` can be subsetted by an interval:
+
+~~~ R
+fmt <- "%Y-%m-%d %H:%M:%S"
+one_second <- 1e9
+a <- seq(nanotime("2012-12-12 12:12:12", fmt), length.out=10, by=one_second)
+idx <- c(as.nanoival("-2012-12-12 12:12:10 -> 2012-12-12 12:12:14-", fmt),
+         as.nanoival("+2012-12-12 12:12:18 -> 2012-12-12 12:12:20+", fmt))
+a[idx]
+~~~
+
+`nanoival` also has the set operations `union`, `intersect`,
+`setdiff`. All are defined for two `nanoival` arguments, and
+additionally `intersect` and `setdiff` can have the first argument as
+a `nanotime` and the result is then a `nanotime` instead of an
+interval.
+
+~~~ R
+a <- seq(nanotime("2012-12-12 12:12:12", fmt), length.out=10, by=one_second)
+i <- as.nanoival("-2012-12-12 12:12:14 -> 2012-12-12 12:12:18-", fmt)
+setdiff(a, i)
+
+i1 <- as.nanoival("+2012-12-12 12:12:14 -> 2012-12-12 12:12:17-", fmt)
+i2 <- as.nanoival("+2012-12-12 12:12:16 -> 2012-12-12 12:12:18-", fmt)
+union(i1, i2)
+~~~
+
+
 ### Status
 
 The package is in the very early stages and is largely untested.
@@ -24,7 +69,7 @@ at least discussed items.
 ### Installation
 
 ```r
-remotes::install_github("lsilvestri/nanoival")
+remotes::install_github("lsilvest/nanoival")
 ```
 
 ### Author

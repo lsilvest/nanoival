@@ -1,11 +1,9 @@
 ## TODO:
-## - implement comparison operators in C, except for == != because they should
-##   be correct in R
 ## - should nanoival have NA?
 ## - what do do when subsetting NA nanotime?
 ## - prevent matrix, array, cbind, rbind, compared with non-interval
-## - see how we can organize documentation for S4 methods that are defined
-##   only to produce an error
+## - see how we can better organize documentation for S4 methods that are
+##   defined only to produce an error
 ## 
 
 
@@ -63,10 +61,8 @@ setClass("nanoival", contains="integer64")
 ##' \code{nanotimeFormat} and a suitable value. Similarly,
 ##' \code{nanotimeTz} can be used to select a different timezone.
 ##' 
-##' @param x The object which want to convert to class \code{nanotime}
-##' @param tz Required for \code{as.POSIXct} and \code{as.POSIXlt},
-##' can be set via \code{options("nanotimeFormat")} and uses \sQuote{UTC} as
-##' a default and fallback
+##' @param x a \code{nanoival} object
+##' @param tz a timezone string
 ##' @param ... further arguments passed to or from methods.
 ##' @param e1 Operand of class \code{nanoival}
 ##' @param e2 Operand of class \code{nanoival}
@@ -78,12 +74,42 @@ setClass("nanoival", contains="integer64")
 ##' @param j Required for \code{[} signature but ignored here
 ##' @param drop Required for \code{[} signature but ignored here
 ##' @param z Required for \code{Complex} signature but ignored here
-##' @param value argument for \code{nanotime-class} 
+##' @param value argument for \code{nanoival-class}
+##' @param start \code{nanotime} start of interval
+##' @param end \code{nanotime} end of interval
+##' @param sopen logical indicating if the start of the interval is open
+##' @param eopen logical indicating if the end of the interval is open
 ##' @return A nanoival object
 ##' @author Leonardo Silvestri
 ##' @examples
-##' x <- as.nanoival("-2012-03-01T21:21:00.000000001+00:00->2015-01-01T21:22:00.000000999+04:00+")
-##' print(x)
+##' ## creating a \code{nanoival}, with the start time included ('+') and the end
+##' ## time excluded ('-')
+##' as.nanoival("+2012-03-01T21:21:00.000000001+00:00->2015-01-01T21:22:00.000000999+04:00-")
+##'
+##' ## a \code{nanoival} can also be created with a pair of \code{nanotime} objects, a start
+##' ## and an end, and optionally two logicals determining if the interval start(end) are open
+##' ## or closed; by default the start is closed and end is open:
+##' start <- nanotime("2012-03-01T21:21:00.000000001+00:00")
+##' end <- nanotime("2013-03-01T21:21:00.000000001+00:00")
+##' nanoival(start, end)
+##'
+##' ## a vector of \code{nanotime} can be subsetted by an interval:
+##' fmt <- "%Y-%m-%d %H:%M:%S"
+##' one_second <- 1e9
+##' a <- seq(nanotime("2012-12-12 12:12:12", fmt), length.out=10, by=one_second)
+##' idx <- c(as.nanoival("-2012-12-12 12:12:10 -> 2012-12-12 12:12:14-", fmt),
+##'          as.nanoival("+2012-12-12 12:12:18 -> 2012-12-12 12:12:20+", fmt))
+##' a[idx]
+##'
+##' ## \code{nanoival} also has the set operations \code{union}, \code{intersect},
+##' ## \code{setdiff}
+##' a <- seq(nanotime("2012-12-12 12:12:12", fmt), length.out=10, by=one_second)
+##' i <- as.nanoival("-2012-12-12 12:12:14 -> 2012-12-12 12:12:18-", fmt)
+##' setdiff(a, i)
+##'
+##' i1 <- as.nanoival("+2012-12-12 12:12:14 -> 2012-12-12 12:12:17-", fmt)
+##' i2 <- as.nanoival("+2012-12-12 12:12:16 -> 2012-12-12 12:12:18-", fmt)
+##' union(i1, i2)
 
 ##' @rdname nanoival
 ##' @export
@@ -572,6 +598,7 @@ setMethod("[",
               if (is.unsorted(x)) stop("x must be sorted")
               i <- sort(i)
               res <- .Call('_nanoival_intersect_time_interval', x, i)
+              class(res) <- "integer64"
               new("nanotime", res)            
           })
 
