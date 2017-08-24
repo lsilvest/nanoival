@@ -9,6 +9,9 @@ is an interval type that allows complex subsetting into such a vector
 of time, for example to keep only specific portions of a time point
 vector.
 
+The goal - not yet implemented - is to use `nanoival` to subset
+time-series `data.table` objects.
+
 ### Demo
 
 ### Examples
@@ -45,7 +48,7 @@ a[idx]
 `setdiff`. All are defined for two `nanoival` arguments, and
 additionally `intersect` and `setdiff` can have the first argument as
 a `nanotime` and the result is then a `nanotime` instead of an
-interval.
+`nanoival`.
 
 ~~~ R
 a <- seq(nanotime("2012-12-12 12:12:12", fmt), length.out=10, by=one_second)
