@@ -464,6 +464,15 @@ test_subsassign <- function() {
 ## 1: ..............
 ## 2:   c----c
 ## r:   ......
+RUnit_intersect_idx_time_interval_cc <- function() {
+    a <- seq(nanotime("2012-12-12 12:12:12"), length.out=10, by=one_second)
+    idx <- as.nanoival("+2012-12-12 12:12:14 -> 2012-12-12 12:12:19+")
+    r <- list(x=c(3,4,5,6,7,8), y=c(1,1,1,1,1,1))
+    checkEquals(intersect.idx(a, idx), r)
+}
+## 1: ..............
+## 2:   c----c
+## r:   ......
 RUnit_intersect_time_interval_cc <- function() {
     a <- seq(nanotime("2012-12-12 12:12:12"), length.out=10, by=one_second)
     idx <- as.nanoival("+2012-12-12 12:12:14 -> 2012-12-12 12:12:19+")

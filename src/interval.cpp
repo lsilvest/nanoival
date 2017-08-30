@@ -27,6 +27,61 @@ static void print(const interval& i) {
   Rcpp::Rcout << (i.sopen ? "-" : "+") << i.s << "->" << i.e << (i.eopen ? "-" : "+") << std::endl;
 }
 
+
+template <typename T, typename U>
+static Rcpp::List intersect_idx(const T* v1, size_t v1_size, const U* v2, size_t v2_size) 
+{
+  Rcpp::NumericVector res_first;
+  Rcpp::NumericVector res_second;
+  size_t i1 = 0, i2 = 0;
+  while (i1 < v1_size && i2 < v2_size) {
+    if (v1[i1] < v2[i2]) {
+      ++i1;
+    } else if (v1[i1] > v2[i2]) {
+      ++i2;
+    } else { 
+      if (v1_size==0 || v1[i1] != v1[i1-1]) {
+        res_first.push_back(i1+1);  // push_back too slow? LLL
+        res_second.push_back(i2+1); // push_back too slow? LLL
+      }      
+      ++i1;
+      //++i2; this is correct for T==U, but not for example when
+      //T==time and U==interval
+    }
+  }
+  return Rcpp::List::create(Rcpp::Named("x")  = res_first,
+                            Rcpp::Named("y") = res_second);
+}
+
+
+/// intersect_idx T=Global::dtime, U=Global::dtime doesn't need specialization.
+/// intersect_idx T=Global::dtime, U=tz::interval doesn't need specialization.
+/// intersect_idx interval/interval doesn't make sense.
+
+// RcppExport SEXP _intersect_idx_time_time(SEXP sv1, SEXP sv2)
+// {
+//   const Rcpp::NumericVector nv1(sv1);
+//   const Rcpp::NumericVector nv2(sv2);  
+//   const size_t v1_size = nv1.size();
+//   const size_t v2_size = nv2.size();
+//   const Global::dtime* v1 = reinterpret_cast<const Global::dtime*>(&nv1[0]);
+//   const Global::dtime* v2 = reinterpret_cast<const Global::dtime*>(&nv2[0]);
+//   return intersect_idx(v1, v1_size, v2, v2_size);
+// }
+
+
+RcppExport SEXP _nanoival_intersect_idx_time_interval(SEXP sv1, SEXP sv2)
+{
+  const Rcpp::NumericVector nv1(sv1);
+  const Rcpp::NumericVector nv2(sv2);  
+  const size_t v1_size = nv1.size();
+  const size_t v2_size = nv2.size() / 3;
+  const Global::dtime* v1 = reinterpret_cast<const Global::dtime*>(&nv1[0]);
+  const interval*      v2 = reinterpret_cast<const interval*>(&nv2[0]);
+  return intersect_idx(v1, v1_size, v2, v2_size);
+}
+
+
 RcppExport SEXP _nanoival_intersect_time_interval(SEXP nanotime, SEXP nanoival) {
   try {
     std::vector<Global::dtime> res;
@@ -404,3 +459,97 @@ RcppExport SEXP _nanoival_eq(SEXP n1, SEXP n2) {
 RcppExport SEXP _nanoival_ne(SEXP n1, SEXP n2) {
   return nanoival_comp(n1, n2, std::not_equal_to<interval>());
 }
+
+
+/// union_idx T=Global::dtime, U=Global::dtime doesn't need specialization.
+/// union_idx T=Global::dtime, U=tz::interval doesn't make sense.
+/// union_idx interval/interval doesn't make sense.
+
+
+// template <typename T, typename U, typename I, typename NANF>
+// struct union_idx_helper {
+//   static std::pair<Vector<I>, Vector<I>> f(const Vector<T>& v1, const Vector<U>& v2)
+//   {
+//     std::pair<Vector<I>, Vector<I>> res;
+//     size_t i1 = 0, i2 = 0;
+//     while (i1 < v1.size() && i2 < v2.size()) {
+//       if (v1[i1] < v2[i2]) {
+//         if (i1==0 || v1[i1] != v1[i1-1]) {
+//           res.first.push_back(i1+1);
+//           res.second.push_back(NANF::f());
+//         }
+//         ++i1;
+//       } else if (v1[i1] > v2[i2]) {
+//         if (i2==0 || v2[i2] != v1[i2-1]) {
+//           res.first.push_back(NANF::f());
+//           res.second.push_back(i2+1);
+//         }
+//         ++i2;
+//       } else {
+//         if (i1==0 || v1[i1] != v1[i1-1]) {
+//           res.first.push_back(i1+1);
+//           res.second.push_back(i2+1);
+//         }
+//         ++i1;
+//         ++i2;
+//       }
+//     }
+
+//     while (i1 < v1.size()) {
+//       if (i1==0 || v1[i1] != v1[i1-1]) {
+//         res.first.push_back(i1+1);
+//         res.second.push_back(NANF::f());
+//       }
+//       ++i1;
+//     }   
+//     while (i2 < v2.size()) {
+//       if (i2==0 || v2[i2] != v2[i2-1]) {
+//         res.first.push_back(NANF::f());
+//         res.second.push_back(i2+1);
+//       }
+//       ++i2;
+//     }   
+
+//     return res;
+//   }
+// };
+
+
+/// setdiff_idx T=Global::dtime, U=Global::dtime doesn't need specialization.
+/// setdiff_idx T=interval, U=interval doesn't make sense
+/// setdiff_idx T=Global::dtime, U=interval:
+
+
+// template <typename T, typename U, typename I>
+// struct setdiff_idx_helper {
+//   static std::pair<Vector<I>, Vector<I>> f(const Vector<T>& v1, const Vector<U>& v2) 
+//   {
+//     std::pair<Vector<I>, Vector<I>> res;
+//     size_t i1 = 0, i2 = 0;
+//     while (i1 < v1.size() && i2 < v2.size()) {
+//       if (v1[i1] < v2[i2]) {
+//         res.first.push_back(i1+1);
+//         ++i1;
+//       } else if (v1[i1] > v2[i2]) {
+//         res.second.push_back(i2+1);
+//         ++i2;
+//       } else { 
+//         ++i1;
+//         ++i2;
+//       }
+//     }
+
+//     // pick up elts left in v1:
+//     while (i1 < v1.size()) {
+//       res.first.push_back(i1+1);
+//       ++i1;
+//     }
+//     // pick up elts left in v2:
+//     while (i2 < v2.size()) {
+//       res.second.push_back(i2+1);
+//       ++i2;
+//     }
+
+//     return res;
+//   }
+// };

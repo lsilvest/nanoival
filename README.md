@@ -60,6 +60,22 @@ i2 <- as.nanoival("+2012-12-12 12:12:16 -> 2012-12-12 12:12:18-", fmt)
 union(i1, i2)
 ~~~
 
+Finally, `intersect.idx` which gives back the indices of the intersection is defined.
+
+~~~ R
+a <- seq(nanotime("2012-12-12 12:12:12"), length.out=10, by=one_second)
+idx <- as.nanoival("+2012-12-12 12:12:14 -> 2012-12-12 12:12:19+")
+intersect.idx(a, idx)
+## which gives back:
+## $x
+## [1] 3 4 5 6 7 8
+## 
+## $y
+## [1] 1 1 1 1 1 1
+                                                                             
+~~~
+
+`union.idx` and `setdiff.idx` will be implemented in the future.
 
 ### Status
 

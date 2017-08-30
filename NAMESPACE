@@ -4,6 +4,7 @@ import("Rcpp")
 import("bit64")
 import("nanotime")
 
+exportMethods(intersect.idx)
 exportMethods(union)
 exportMethods(setdiff)
 exportMethods(intersect)
