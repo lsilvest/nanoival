@@ -618,6 +618,9 @@ setMethod("[",
 
 setGeneric("intersect.idx", function(x, y) standardGeneric("intersect.idx"))
 
+
+## need to add nanotime/nanotime LLL
+
 ##' @rdname nanoival
 ##' @export
 setMethod("intersect.idx",
@@ -627,6 +630,7 @@ setMethod("intersect.idx",
               y <- sort(y)
               .Call('_nanoival_intersect_idx_time_interval', x, y)
           })
+
 
 ##' @rdname nanoival
 ##' @export
@@ -651,6 +655,19 @@ setMethod("setdiff",
               class(res) <- "integer64"
               new("nanotime", res)
           })
+
+setGeneric("setdiff.idx", function(x, y) standardGeneric("setdiff.idx"))
+
+##' @rdname nanoival
+##' @export
+setMethod("setdiff.idx",
+          c("nanotime", "nanoival"),
+          function(x, y) {
+              if (is.unsorted(x)) stop("x must be sorted")
+              y <- sort(y)
+              .Call('_nanoival_setdiff_idx_time_interval', x, y)
+          })
+
 
 ## misc functions:
 ## --------------
