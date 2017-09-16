@@ -16,7 +16,7 @@ time-series `data.table` objects.
 
 ### Examples
 
-Creating a \code{nanoival}, with the start time included ('+') and the end
+Creating a `nanoival`, with the start time included ('+') and the end
 time excluded ('-')
 
 ~~~ R
