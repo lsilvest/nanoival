@@ -508,11 +508,18 @@ static Rcpp::List setdiff_idx(const T* v1, size_t v1_size, const U* v2, size_t v
 
 RcppExport SEXP _nanoival_setdiff_idx_time_interval(SEXP sv1, SEXP sv2)
 {
-  const Rcpp::NumericVector nv1(sv1);
-  const Rcpp::NumericVector nv2(sv2);  
-  const size_t v1_size = nv1.size();
-  const size_t v2_size = nv2.size() / 3;
-  const Global::dtime* v1 = reinterpret_cast<const Global::dtime*>(&nv1[0]);
-  const interval*      v2 = reinterpret_cast<const interval*>(&nv2[0]);
-  return setdiff_idx(v1, v1_size, v2, v2_size);
+  try {
+    const Rcpp::NumericVector nv1(sv1);
+    const Rcpp::NumericVector nv2(sv2);  
+    const size_t v1_size = nv1.size();
+    const size_t v2_size = nv2.size() / 3;
+    const Global::dtime* v1 = reinterpret_cast<const Global::dtime*>(&nv1[0]);
+    const interval*      v2 = reinterpret_cast<const interval*>(&nv2[0]);
+    return setdiff_idx(v1, v1_size, v2, v2_size);
+  } catch(std::exception &ex) {	
+    forward_exception_to_r(ex);
+  } catch(...) { 
+    ::Rf_error("c++ exception (unknown reason)"); 
+  }
+  return R_NilValue;             // not reached
 }
